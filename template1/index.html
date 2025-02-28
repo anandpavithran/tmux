@@ -1,1 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Command to tmux</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #output { background-color: #f4f4f4; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; font-family: monospace; }
+        button { padding: 10px 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Send Command to tmux Session</h1>
+    <form id="commandForm">
+        <label for="command">Command:</label><br>
+        <input type="text" id="command" name="command" required><br><br>
+        <button type="submit">Run Command</button>
+    </form>
 
+    <h2>Output:</h2>
+    <div id="output"></div>
+
+    <!-- Include Socket.io -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        
+        // Listen for output from the server
+        socket.on('output', function(data) {
+            var outputDiv = document.getElementById('output');
+            if (data.error) {
+                outputDiv.textContent = `Error: ${data.error}`;
+            } else {
+                outputDiv.textContent = `Result: ${data.data}`;
+            }
+        });
+
+        // Handle the form submission
+        document.getElementById('commandForm').onsubmit = function(e) {
+            e.preventDefault();  // Prevent form from reloading the page
+
+            const command = document.getElementById('command').value;
+
+            // Send the command to the server via WebSocket
+            socket.emit('run_command', { command: command });
+        };
+    </script>
+</body>
+</html>
