@@ -1,1 +1,55 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Selected Text to Terminal</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #output { background-color: #f4f4f4; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; font-family: monospace; }
+        button { padding: 10px 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Select and Submit Text to tmux</h1>
+
+    <p>Select text from the paragraph below and press the button to send it to the terminal:</p>
+    
+    <p id="textArea" style="border: 1px solid #ccc; padding: 10px; font-family: monospace;">
+        This is an example text that you can select. Try selecting some of this text and submitting it to the terminal.
+    </p>
+
+    <button id="submitTextButton">Submit Selected Text</button>
+
+    <h2>Output:</h2>
+    <div id="output"></div>
+
+    <!-- Include Socket.io -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        
+        // Listen for output from the server
+        socket.on('output', function(data) {
+            var outputDiv = document.getElementById('output');
+            if (data.error) {
+                outputDiv.textContent = `Error: ${data.error}`;
+            } else {
+                outputDiv.textContent = `Result: ${data.result}`;
+            }
+        });
+
+        // Handle button click to submit selected text
+        document.getElementById('submitTextButton').onclick = function() {
+            var selectedText = window.getSelection().toString().trim(); // Get the selected text
+            if (selectedText) {
+                // Send the selected text to the server via WebSocket
+                socket.emit('submit_text', { text: selectedText });
+            } else {
+                alert('Please select some text first!');
+            }
+        };
+    </script>
+</body>
+</html>
