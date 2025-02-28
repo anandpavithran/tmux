@@ -1,5 +1,5 @@
 import subprocess
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
 import os
 
@@ -20,7 +20,7 @@ def send_command_to_tmux(command):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html')  # Make sure the template is in the 'templates' folder
 
 @socketio.on('run_command')
 def handle_run_command(data):
